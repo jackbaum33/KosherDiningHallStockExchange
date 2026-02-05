@@ -1,14 +1,32 @@
 from flask import Flask, render_template, request, jsonify, session
 from datetime import datetime
 import os
-from models import Market
+from database import db
+from market_service import MarketService
 from config import FRIENDS, ALL_MEALS
+from init_db import init_database
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
-# Initialize market
-market = Market()
+# Database configuration
+# For development, use SQLite
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///dining_exchange.db')
+# For production, use PostgreSQL:
+# app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'postgresql://user:password@localhost/dining_exchange')
+
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'pool_pre_ping': True,
+    'pool_recycle': 300,
+}
+
+# Initialize database
+db.init_app(app)
+
+# Create tables and initialize data
+with app.app_context():
+    init_database()
 
 @app.route('/')
 def index():
@@ -31,23 +49,24 @@ def logout():
 def current_user():
     user = session.get('user')
     if user:
+        user_obj = MarketService.get_user(user)
         return jsonify({
             'username': user,
-            'balance': market.get_balance(user),
-            'ipo_price': market.get_current_ipo_price()
+            'balance': user_obj.balance,
+            'ipo_price': MarketService.get_current_ipo_price()
         })
     return jsonify({'username': None}), 401
 
 @app.route('/api/market_summary')
 def market_summary():
-    return jsonify(market.get_market_summary())
+    return jsonify(MarketService.get_market_summary())
 
 @app.route('/api/start_ipo', methods=['POST'])
 def start_ipo():
     if 'user' not in session:
         return jsonify({'success': False, 'message': 'Not logged in'}), 401
-    market.start_ipo()
-    return jsonify({'success': True, 'ipo_price': market.get_current_ipo_price()})
+    MarketService.start_ipo()
+    return jsonify({'success': True, 'ipo_price': MarketService.get_current_ipo_price()})
 
 @app.route('/api/buy_ipo', methods=['POST'])
 def buy_ipo():
@@ -58,7 +77,7 @@ def buy_ipo():
     meal = request.json.get('meal')
     qty = request.json.get('qty')
     
-    success, message = market.buy_from_ipo(user, meal, qty)
+    success, message = MarketService.buy_from_ipo(user, meal, qty)
     return jsonify({'success': success, 'message': message})
 
 @app.route('/api/secondary_buy', methods=['POST'])
@@ -72,7 +91,7 @@ def secondary_buy():
     qty = request.json.get('qty')
     snap_buy = request.json.get('snap_buy', False)
     
-    success, message, trades = market.place_buy_order(user, meal, price, qty, snap_buy)
+    success, message, trades = MarketService.place_buy_order(user, meal, price, qty, snap_buy)
     return jsonify({'success': success, 'message': message, 'trades': trades})
 
 @app.route('/api/sell', methods=['POST'])
@@ -86,7 +105,7 @@ def sell():
     qty = request.json.get('qty')
     is_short = request.json.get('is_short', False)
     
-    success, message, trades = market.place_sell_order(user, meal, price, qty, is_short)
+    success, message, trades = MarketService.place_sell_order(user, meal, price, qty, is_short)
     return jsonify({'success': success, 'message': message, 'trades': trades})
 
 @app.route('/api/portfolio')
@@ -95,15 +114,15 @@ def portfolio():
         return jsonify({'success': False, 'message': 'Not logged in'}), 401
     
     user = session['user']
-    return jsonify(market.get_portfolio(user))
+    return jsonify(MarketService.get_portfolio(user))
 
 @app.route('/api/trade_history')
 def trade_history():
-    return jsonify(market.get_trade_history(limit=20))
+    return jsonify(MarketService.get_trade_history(limit=20))
 
 @app.route('/api/order_book/<meal>')
 def order_book(meal):
-    return jsonify(market.get_order_book(meal))
+    return jsonify(MarketService.get_order_book(meal))
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=8000)
