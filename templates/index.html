@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>U-M Dining Exchange</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .user-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .login-form {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .login-form input, .login-form button {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .btn:hover {
+            background: #5568d3;
+        }
+        
+        .btn-danger {
+            background: #e74c3c;
+        }
+        
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+        
+        .btn-success {
+            background: #27ae60;
+        }
+        
+        .btn-success:hover {
+            background: #229954;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .card h2 {
+            color: #333;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 500px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        
+        .close {
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #aaa;
+        }
+        
+        .close:hover {
+            color: #000;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .badge-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .ipo-price {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        #loginSection {
+            display: block;
+        }
+        
+        #mainApp {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login Section -->
+        <div id="loginSection">
+            <div class="card" style="max-width: 400px; margin: 100px auto;">
+                <h2>U-M Dining Exchange Login</h2>
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="loginUsername" placeholder="Enter your name">
+                </div>
+                <button class="btn" onclick="login()">Login</button>
+            </div>
+        </div>
+
+        <!-- Main App -->
+        <div id="mainApp">
+            <div class="header">
+                <h1>🍽️ U-M Dining Exchange</h1>
+                <div class="user-info">
+                    <div>
+                        <span id="username">User</span> | 
+                        Balance: $<span id="balance">0.00</span> | 
+                        IPO Price: <span class="ipo-price">$<span id="ipoPrice">200.00</span></span>
+                    </div>
+                    <div>
+                        <button class="btn btn-success" onclick="startIPO()">Start IPO</button>
+                        <button class="btn btn-danger" onclick="logout()">Logout</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid">
+                <div class="card">
+                    <h2>Quick Actions</h2>
+                    <button class="btn" onclick="openModal('buyIPO')" style="width: 100%; margin-bottom: 10px;">Buy from IPO</button>
+                    <button class="btn" onclick="openModal('secondaryBuy')" style="width: 100%; margin-bottom: 10px;">Secondary Buy</button>
+                    <button class="btn" onclick="openModal('sell')" style="width: 100%; margin-bottom: 10px;">Sell/Short</button>
+                    <button class="btn" onclick="loadPortfolio()" style="width: 100%;">View Portfolio</button>
+                </div>
+
+                <div class="card">
+                    <h2>My Portfolio</h2>
+                    <div id="portfolioDisplay">
+                        <p style="color: #999;">No positions</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Market Summary</h2>
+                <div style="overflow-x: auto;">
+                    <table id="marketTable">
+                        <thead>
+                            <tr>
+                                <th>Meal</th>
+                                <th>Category</th>
+                                <th>IPO Supply</th>
+                                <th>Best Ask</th>
+                                <th>Best Bid</th>
+                                <th>Spread</th>
+                            </tr>
+                        </thead>
+                        <tbody id="marketBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Recent Trades</h2>
+                <div style="overflow-x: auto;">
+                    <table id="tradeTable">
+                        <thead>
+                            <tr>
+                                <th>Buyer</th>
+                                <th>Seller</th>
+                                <th>Meal</th>
+                                <th>Qty</th>
+                                <th>Price</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tradeBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Buy IPO Modal -->
+    <div id="buyIPOModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('buyIPO')">&times;</span>
+            <h2>Buy from IPO</h2>
+            <div class="form-group">
+                <label>Meal</label>
+                <select id="buyIPOMeal"></select>
+            </div>
+            <div class="form-group">
+                <label>Quantity</label>
+                <input type="number" id="buyIPOQty" min="1" value="1">
+            </div>
+            <button class="btn" onclick="buyIPO()">Buy</button>
+        </div>
+    </div>
+
+    <!-- Secondary Buy Modal -->
+    <div id="secondaryBuyModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('secondaryBuy')">&times;</span>
+            <h2>Secondary Market Buy</h2>
+            <div class="form-group">
+                <label>Meal</label>
+                <select id="secondaryBuyMeal"></select>
+            </div>
+            <div class="form-group">
+                <label>Max Price</label>
+                <input type="number" id="secondaryBuyPrice" min="0" step="0.01" value="100">
+            </div>
+            <div class="form-group">
+                <label>Quantity</label>
+                <input type="number" id="secondaryBuyQty" min="1" value="1">
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="snapBuy"> Snap Buy (execute immediately only)
+                </label>
+            </div>
+            <button class="btn" onclick="secondaryBuy()">Place Order</button>
+        </div>
+    </div>
+
+    <!-- Sell Modal -->
+    <div id="sellModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('sell')">&times;</span>
+            <h2>Sell/Short</h2>
+            <div class="form-group">
+                <label>Meal</label>
+                <select id="sellMeal"></select>
+            </div>
+            <div class="form-group">
+                <label>Min Price</label>
+                <input type="number" id="sellPrice" min="0" step="0.01" value="100">
+            </div>
+            <div class="form-group">
+                <label>Quantity</label>
+                <input type="number" id="sellQty" min="1" value="1">
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="isShort"> Short Sell
+                </label>
+            </div>
+            <button class="btn" onclick="sell()">Place Order</button>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
